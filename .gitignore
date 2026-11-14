@@ -1,0 +1,9 @@
+# Thu muc build
+Debug/
+Release/
+
+# File rieng cua tung may
+*.launch
+.settings/language.settings.xml
+*.bak
+*.tmp
