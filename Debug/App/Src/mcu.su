@@ -1,0 +1,2 @@
+../App/Src/mcu.c:26:6:mcu_init	4	static
+../App/Src/mcu.c:31:6:mcu_task_10ms	4	static

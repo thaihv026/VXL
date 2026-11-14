@@ -1,0 +1,2 @@
+../App/Src/lux.c:28:6:lux_init	4	static
+../App/Src/lux.c:33:6:lux_task_10ms	4	static

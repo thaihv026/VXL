@@ -1,0 +1,6 @@
+../App/Src/app_common.c:33:6:app_set_vdda	3
+../App/Src/app_common.c:41:13:adc_update	3
+../App/Src/app_common.c:59:6:app_init	1
+../App/Src/app_common.c:78:6:app_loop	4
+../App/Src/app_common.c:107:6:HAL_ADC_ConvHalfCpltCallback	2
+../App/Src/app_common.c:114:6:HAL_ADC_ConvCpltCallback	2
