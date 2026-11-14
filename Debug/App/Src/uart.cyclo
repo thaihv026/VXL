@@ -1,2 +1,0 @@
-../App/Src/uart.c:22:6:uart_init	1
-../App/Src/uart.c:27:6:uart_task_100ms	1

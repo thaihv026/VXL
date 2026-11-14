@@ -1,6 +1,0 @@
-../App/Src/app_common.c:33:6:app_set_vdda	16	static
-../App/Src/app_common.c:41:13:adc_update	48	static
-../App/Src/app_common.c:59:6:app_init	8	static
-../App/Src/app_common.c:78:6:app_loop	16	static
-../App/Src/app_common.c:107:6:HAL_ADC_ConvHalfCpltCallback	16	static
-../App/Src/app_common.c:114:6:HAL_ADC_ConvCpltCallback	16	static

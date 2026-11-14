@@ -1,2 +1,0 @@
-../App/Src/led.c:28:6:led_init	4	static
-../App/Src/led.c:33:6:led_task_10ms	4	static
