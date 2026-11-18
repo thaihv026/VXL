@@ -7,3 +7,6 @@ Release/
 .settings/language.settings.xml
 *.bak
 *.tmp
+
+# Ket qua mo phong
+out/csv/

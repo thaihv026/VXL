@@ -45,7 +45,7 @@
 
 /* ===================== Khoi LED ===================== */
 #define PWM_PERIOD              1024u   /* TIM2 ARR = 1023 -> 72 MHz / 1024 = 70.3 kHz */
-#define VSET_PER_DUTY_V         0.359f  /* 3.3 V * 3.3k / (27k + 3.3k) */
+#define VSET_PER_DUTY_V         0.327f  /* 3.3 V * 3.3k / (27k + 3.3k + 1.5k + 1.5k) */
 #define RS_OHM                  1.0f    /* dien tro sense */
 #define LED_MAX_MA              200.0f  /* gioi han dong LED */
 #define DUTY_MAX                ((LED_MAX_MA / 1000.0f) * RS_OHM / VSET_PER_DUTY_V)  /* ~0.557 */

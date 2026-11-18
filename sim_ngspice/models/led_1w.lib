@@ -1,0 +1,4 @@
+* LED trang 1 W (gan dung): Vf ~2.6 V @20 mA, ~3.0 V @200 mA, ~3.2 V @350 mA
+* Do Vf that cua LED mua ve o 200 mA roi chinh Is:
+*   Vf cao hon dV -> nhan Is voi exp(-dV/0.129); thap hon -> exp(+dV/0.129)
+.model LEDW D(Is=5.4e-11 N=5 Rs=0.8 Cjo=100p)

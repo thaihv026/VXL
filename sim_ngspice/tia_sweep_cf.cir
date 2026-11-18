@@ -1,0 +1,69 @@
+* =================================================================
+* tia_sweep_cf.cir - Quet tu Cf cho 4 thang (MCP6001 + ADG709, Kelvin)
+* Quet: thang k x he so m (Cf = m * Cf danh dinh) x CJ (photodiode + PCB)
+*   Cf danh dinh: 10p, 100p, 1n, 10n
+*   overshoot (%) = vot lo cua V(oa) khi dau ra tang 2 V
+*   t99 (us)      = thoi diem V(oa) dat 99% lan dau (doc cung overshoot)
+* Ket qua: bang + out/csv/tia_cf_<n>.csv (n = so thu tu trong bang; luu song
+* cho moi Cf o thang 0 va cho Cf danh dinh o thang 1..3)
+* =================================================================
+.param k=0 m=1 CJ=70p RON=11 ILK=0.1n KEL=1 CSOFF=13p
+.param CN0=10p CN1=100p CN2=1n CN3=10n
+.param CF0={(k==0 ? m : 1)*CN0} CF1={(k==1 ? m : 1)*CN1}
+.param CF2={(k==2 ? m : 1)*CN2} CF3={(k==3 ? m : 1)*CN3}
+.param ISTEP={2/RK} TSTEP=3m
+.include tia_common.inc
+Cda oa 0 48p
+Cdb sense 0 48p
+
+.options noinit
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+shell mkdir out
+* thu muc rieng cho du lieu dang song (csv), xoa duoc ca thu muc
+cd out
+shell mkdir csv
+cd ..
+echo "n  thang  m  CJ  Cf  overshoot(%)  t99(us)"
+echo "n  thang  m  CJ  Cf  overshoot(%)  t99(us)" > out/tia_sweep_cf.txt
+* bo dem dat trong plot "const" de khong mat sau moi lan tran (ngspice 46)
+setplot const
+let n = 0
+foreach cj 50p 70p 120p
+  foreach mm 0.22 0.47 1 2.2 4.7
+    foreach kk 0 1 2 3
+      let const.n = const.n + 1
+      alterparam k=$kk
+      alterparam m=$mm
+      alterparam CJ=$cj
+      reset
+      tran 1u 5m 2.9m 0.2u
+      let nn = const.n
+      set idx = "$&nn"
+      meas tran vpre FIND v(oa) AT=2.99m
+      meas tran vfin FIND v(oa) AT=4.9m
+      meas tran vmax MAX  v(oa) from=3m to=4.9m
+      let lev = vpre+0.99*(vfin-vpre)
+      meas tran tc WHEN v(oa)=lev RISE=1 TD=3m
+      let ov  = 100*(vmax-vfin)/(vfin-vpre)
+      let t99 = (tc-3m)*1e6
+      let cfn = ($kk = 0)*10e-12+($kk = 1)*100e-12+($kk = 2)*1e-9+($kk = 3)*10e-9
+      let cf  = cfn*$mm*1e12
+      echo "$&nn  $kk  $mm  $cj  $&cf pF  $&ov  $&t99"
+      echo "$&nn  $kk  $mm  $cj  $&cf pF  $&ov  $&t99" >> out/tia_sweep_cf.txt
+      if $kk = 0
+        linearize v(oa)
+        wrdata out/csv/tia_cf_{$idx}.csv v(oa)
+      else
+        if $mm = 1
+          linearize v(oa)
+          wrdata out/csv/tia_cf_{$idx}.csv v(oa)
+        end
+      end
+    end
+  end
+end
+.endc
+.end

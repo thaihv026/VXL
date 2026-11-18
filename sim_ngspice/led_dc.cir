@@ -1,0 +1,53 @@
+* =================================================================
+* led_dc.cir - Khoi LED day du: PWM (PA2) -> loc RC bac 2 -> driver dong
+* Quet duty x VSYS (pin 2S: 6.0 / 7.4 / 8.4 V).
+* Chay: ngspice -b led_dc.cir   (trong thu muc chua .spiceinit)
+* Ket qua: bang in ra man hinh + file out/led_dc.csv
+* =================================================================
+.param T=14.2222u          ; 72 MHz / 1024 = 70.3 kHz
+.param D=0.5 VS=7.4 C5=10n
+.include led_common.inc
+
+VSYS vsys 0 {VS}
+Vpwm pwm 0 PULSE(0 3.3 0 5n 5n {D*T} {T})
+R4 pwm f1 1.5k
+C3 f1 0 100n
+R5 f1 f2 1.5k
+C4 f2 0 100n
+R6 f2 vset 27k
+R7 vset 0 3.3k
+
+.options noinit
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+shell mkdir out
+echo "D      VSYS   VSET(mV)  I(mA)    Ipp(mA)  Vgate(V)  Vds(V)  Pfet(mW)  Prser(mW)"
+echo "D      VSYS   VSET(mV)  I(mA)    Ipp(mA)  Vgate(V)  Vds(V)  Pfet(mW)  Prser(mW)" > out/led_dc.txt
+foreach vv 6.0 7.4 8.4
+  foreach dd 0.1 0.3 0.5 0.612
+    alterparam D=$dd
+    alterparam VS=$vv
+    reset
+    tran 50n 6m 0 50n
+    let vds  = v(drain)-v(isense)
+    let pfet = vds*v(isense)*1000
+    let prs  = (v(vsys)-v(ledA))*(v(vsys)-v(ledA))/10*1000
+    let ima  = v(isense)*1000
+    meas tran vset_avg AVG v(vset) from=4m to=6m
+    meas tran i_ma     AVG ima     from=4m to=6m
+    meas tran i_max    MAX ima     from=4m to=6m
+    meas tran i_min    MIN ima     from=4m to=6m
+    meas tran vg       AVG v(oa)   from=4m to=6m
+    meas tran vds_avg  AVG vds     from=4m to=6m
+    meas tran pfet_mw  AVG pfet    from=4m to=6m
+    meas tran prs_mw   AVG prs     from=4m to=6m
+    let vset_mv = vset_avg*1000
+    let ipp = i_max-i_min
+    echo "$dd  $vv  $&vset_mv  $&i_ma  $&ipp  $&vg  $&vds_avg  $&pfet_mw  $&prs_mw"
+    echo "$dd  $vv  $&vset_mv  $&i_ma  $&ipp  $&vg  $&vds_avg  $&pfet_mw  $&prs_mw" >> out/led_dc.txt
+  end
+end
+.endc
+.end

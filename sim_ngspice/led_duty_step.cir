@@ -1,0 +1,44 @@
+* =================================================================
+* led_duty_step.cir - Doi duty 0.2 -> 0.5 tai 4 ms (VSYS = 7.4 V)
+* Do thoi gian dong LED dat gia tri moi: do tre cua loc PWM ma
+* bo PI 100 Hz nhin thay. Ket qua: bang + out/csv/led_duty_step.csv
+* =================================================================
+.param T=14.2222u C5=10n
+.include led_common.inc
+VSYS vsys 0 7.4
+Bpwm pwm 0 V=3.3*u( (time<4m ? 0.2 : 0.5)*T - (time - T*floor(time/T)) )
+R4 pwm f1 1.5k
+C3 f1 0 100n
+R5 f1 f2 1.5k
+C4 f2 0 100n
+R6 f2 vset 27k
+R7 vset 0 3.3k
+
+.options noinit
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+shell mkdir out
+* thu muc rieng cho du lieu dang song (csv), xoa duoc ca thu muc
+cd out
+shell mkdir csv
+cd ..
+tran 1u 7m 3.5m 20n
+let ima = v(isense)*1000
+meas tran ipre AVG ima from=3.8m to=4m
+meas tran ifin AVG ima from=6.6m to=7m
+let l63 = ipre+0.63*(ifin-ipre)
+let l99 = ipre+0.99*(ifin-ipre)
+meas tran tc63 WHEN ima=l63 RISE=1 TD=4m
+meas tran tc99 WHEN ima=l99 RISE=1 TD=4m
+let t63 = (tc63-4m)*1e6
+let t99 = (tc99-4m)*1e6
+echo "I truoc(mA)  I sau(mA)  t63(us)  t99(us)"
+echo "I truoc(mA)  I sau(mA)  t63(us)  t99(us)" > out/led_duty_step.txt
+echo "$&ipre  $&ifin  $&t63  $&t99"
+echo "$&ipre  $&ifin  $&t63  $&t99" >> out/led_duty_step.txt
+linearize ima v(vset)
+wrdata out/csv/led_duty_step.csv ima v(vset)
+.endc
+.end

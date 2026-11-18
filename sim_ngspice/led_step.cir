@@ -1,0 +1,50 @@
+* =================================================================
+* led_step.cir - On dinh vong dong: VSET nhay bac 50 -> 150 mV tai 1 ms
+* (bo qua loc PWM). Quet C5 (1f = coi nhu khong co tu) x VSYS.
+* Ket qua: bang + out/csv/led_step_<n>.csv (t, I_LED mA, V gate); n la so thu tu trong bang
+* =================================================================
+.param C5=10n VS=7.4
+.include led_common.inc
+VSYS vsys 0 {VS}
+Vset vset 0 PULSE(0.05 0.15 1m 1u 1u 1 2)
+
+.options noinit
+.control
+set noaskquit
+set wr_singlescale
+set wr_vecnames
+shell mkdir out
+* thu muc rieng cho du lieu dang song (csv), xoa duoc ca thu muc
+cd out
+shell mkdir csv
+cd ..
+echo "n  C5  VSYS  overshoot(%)  t99(us)  I_cuoi(mA)"
+echo "n  C5  VSYS  overshoot(%)  t99(us)  I_cuoi(mA)" > out/led_step.txt
+* bo dem dat trong plot "const" de khong mat sau moi lan tran (ngspice 46)
+setplot const
+let n = 0
+foreach vv 6.0 8.4
+  foreach cc 1f 1n 10n 47n
+    let const.n = const.n + 1
+    alterparam C5=$cc
+    alterparam VS=$vv
+    reset
+    tran 0.1u 1.6m 0.9m 20n
+    let nn = const.n
+    set idx = "$&nn"
+    let ima = v(isense)*1000
+    meas tran ipre FIND ima AT=0.99m
+    meas tran ifin AVG  ima from=1.5m to=1.6m
+    meas tran imax MAX  ima from=1m to=1.6m
+    let ilev = ipre+0.99*(ifin-ipre)
+    meas tran tcross WHEN ima=ilev RISE=1 TD=1m
+    let ov  = 100*(imax-ifin)/(ifin-ipre)
+    let t99 = (tcross-1m)*1e6
+    echo "$&nn  $cc  $vv  $&ov  $&t99  $&ifin"
+    echo "$&nn  $cc  $vv  $&ov  $&t99  $&ifin" >> out/led_step.txt
+    linearize ima v(oa)
+    wrdata out/csv/led_step_{$idx}.csv ima v(oa)
+  end
+end
+.endc
+.end

@@ -1,0 +1,58 @@
+* =================================================================
+* tia_mux_compare.cir - So sanh mux (74HC4052 / ADG709) va noi Kelvin
+* 4 cau hinh (Ron, dong ro, co/khong Kelvin) x 4 thang. 74HC4052: Ron 150 ohm,
+* ro 100 nA/chan (toi da datasheet). ADG709: Ron 11 ohm, ro 0.1 nA/chan (ban C). Dong quang nhay bac tai 3 ms de dau ra tang 2 V.
+*   v_toi  = V(adc) luc toi (2.9 ms)  -> lech do dong ro
+*   span   = V(adc) sang - toi        -> ly tuong 2.000 V
+* Ket qua: bang + out/tia_mux_compare.txt
+* =================================================================
+.param k=0 RON=11 ILK=0.1n KEL=1 CSOFF=13p CJ=70p
+.param CF0=22p CF1=100p CF2=1n CF3=10n
+.param ISTEP={2/RK} TSTEP=3m
+.include tia_common.inc
+
+.options noinit
+.control
+set noaskquit
+shell mkdir out
+echo "cau_hinh  so  thang  v_toi(V)  v_sang(V)  span(V)  sai_so_span(%)"
+echo "cau_hinh  so  thang  v_toi(V)  v_sang(V)  span(V)  sai_so_span(%)" > out/tia_mux_compare.txt
+foreach cfg 1 2 3 4
+  if $cfg = 1
+    alterparam RON=150
+    alterparam ILK=100n
+    alterparam KEL=1
+    set name = hc4052_kelvin
+  end
+  if $cfg = 2
+    alterparam RON=150
+    alterparam ILK=100n
+    alterparam KEL=0
+    set name = hc4052_khong_kelvin
+  end
+  if $cfg = 3
+    alterparam RON=11
+    alterparam ILK=0.1n
+    alterparam KEL=1
+    set name = adg709_kelvin
+  end
+  if $cfg = 4
+    alterparam RON=11
+    alterparam ILK=0.1n
+    alterparam KEL=0
+    set name = adg709_khong_kelvin
+  end
+  foreach kk 0 1 2 3
+    alterparam k=$kk
+    reset
+    tran 1u 5m 2.5m 1u
+    meas tran vtoi  FIND v(adc) AT=2.9m
+    meas tran vsang FIND v(adc) AT=4.9m
+    let span = vsang-vtoi
+    let err  = 100*(span-2)/2
+    echo "$name  $cfg  $kk  $&vtoi  $&vsang  $&span  $&err"
+    echo "$name  $cfg  $kk  $&vtoi  $&vsang  $&span  $&err" >> out/tia_mux_compare.txt
+  end
+end
+.endc
+.end

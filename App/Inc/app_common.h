@@ -16,12 +16,12 @@
  *   - Moi khoi chi cong khai xxx_init() va mot ham xxx_task_...().
  *     Ben trong khoi, nguoi phu trach tu tao them ham, file.
  *   - Cac khoi trao doi qua bien chung g_sys, khong goi ham cua nhau.
- *   - Moi truong trong g_sys chi DUNG MOT khoi duoc ghi (xem ghi chu).
+ *   - Moi truong (field) trong g_sys chi DUNG MOT khoi duoc ghi (xem ghi chu).
  *   - Moi ham task phai chay xong nhanh, khong dung HAL_Delay().
  *     Tong thoi gian cac task trong mot nhip phai duoi 10 ms, neu khong
  *     se mat cua so du lieu ADC. Rieng OLED: gui ca khung hinh qua I2C
  *     mat ~25 ms -> dung HAL_I2C_..._DMA hoac moi lan chi gui mot phan.
- *   - Chi nguoi 3 sua app_common.c/.h va file .ioc.
+ *
  *
  * NGOAI VI THUOC VE AI
  *   ADC1, DMA1_Ch1, TIM3         : app_common.c
